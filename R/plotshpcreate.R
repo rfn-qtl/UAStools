@@ -46,7 +46,7 @@
 #' Units can also be input as meters using unit="meter".
 #' @param SquarePlot Logic parameter to indicated if PDF file is desired for visualization of none rotated polygons.
 #' @param RotatePlot Logic parameter to indicated if PDF file is desired for visualization of rotated polygons.
-#' @import rgdal sp
+#' @import sf sp
 #' @export
 #' @return NULL 
 #' @note it is recommendeed to repeat unique Barcodes and Plot numbers if there are multirow plots (mrowplot>1) as
@@ -128,14 +128,12 @@ plotshpcreate<-function(A=NULL, #Point A c(Easting_0.0,Northing_0.0)
                         SquarePlot=TRUE,
                         RotatePlot=TRUE){
 # infile<-x
-  if (!requireNamespace("rgdal", quietly = TRUE)) {
-    stop("Package \"rgdal\" needed for this function to work. Please install it.",
-         call. = FALSE)
+  if (!requireNamespace("sf", quietly = TRUE)) {
+    stop("Package \"sf\" needed for this function to work. Please install it.", call. = FALSE)
   }
   
   if (!requireNamespace("sp", quietly = TRUE)) {
-    stop("Package \"sp\" needed for this function to work. Please install it.",
-         call. = FALSE)
+    stop("Package \"sp\" needed for this function to work. Please install it.", call. = FALSE)
   }
   
   if (!is.null(stagger)){
@@ -915,13 +913,8 @@ for (i in 1:nrow(PlotsSquareM)){
 
 
   FolderpathGPSPlots<-paste(field,"_",outfile,".shp",sep="")
-  writeOGR(SpatialPolygonsToMake.df,
-           FolderpathGPSPlots,
-           field,
-           verbose = TRUE,
-           overwrite_layer = T,
-           driver="ESRI Shapefile")
-
+  sf_obj <- sf::st_as_sf(SpatialPolygonsToMake.df)
+  sf::st_write(sf_obj, dsn = FolderpathGPSPlots, driver = "ESRI Shapefile", delete_layer = TRUE)
 
   ########## Make Shape Files4 ##############
   # ord_infile<-infile[order(infile$Range,infile$Row)]
@@ -960,12 +953,9 @@ for (i in 1:nrow(PlotsSquareM)){
 
 
   FolderpathGPSPlots<-paste(field,outfile,"buff.shp",sep="_")
-  writeOGR(SpatialPolygonsToMake.df,
-           FolderpathGPSPlots,
-           paste(field,"Buff",sep="_"),
-           verbose = TRUE,
-           overwrite_layer = T,
-           driver="ESRI Shapefile")
+  sf_obj_buf <- sf::st_as_sf(SpatialPolygonsToMake.df)
+  sf::st_write(sf_obj_buf, dsn = FolderpathGPSPlots, driver = "ESRI Shapefile", delete_layer = TRUE)
+  
 
   
 }
